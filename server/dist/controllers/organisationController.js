@@ -14,7 +14,8 @@ export const createOrganisation = (req, res) => __awaiter(void 0, void 0, void 0
     try {
         const { name, description, adminId } = req.body;
         if (!name || !adminId) {
-            return res.status(400).json({ message: "Name and adminId are required" });
+            res.status(400).json({ message: "Name and adminId are required" });
+            return;
         }
         // Create the organisation
         const organisation = new Organisation({ name, description, admin: adminId });
@@ -49,7 +50,8 @@ export const getOrganisationById = (req, res) => __awaiter(void 0, void 0, void 
         const { id } = req.params;
         const organisation = yield Organisation.findById(id).populate("admin", "name email");
         if (!organisation) {
-            return res.status(404).json({ message: "Organisation not found" });
+            res.status(404).json({ message: "Organisation not found" });
+            return;
         }
         res.status(200).json(organisation);
     }
@@ -65,7 +67,8 @@ export const updateOrganisation = (req, res) => __awaiter(void 0, void 0, void 0
         const { name, description } = req.body;
         const updatedOrganisation = yield Organisation.findByIdAndUpdate(id, { name, description }, { new: true, runValidators: true });
         if (!updatedOrganisation) {
-            return res.status(404).json({ message: "Organisation not found" });
+            res.status(404).json({ message: "Organisation not found" });
+            return;
         }
         res.status(200).json(updatedOrganisation);
     }
@@ -80,7 +83,8 @@ export const deleteOrganisation = (req, res) => __awaiter(void 0, void 0, void 0
         const { id } = req.params;
         const deletedOrganisation = yield Organisation.findByIdAndDelete(id);
         if (!deletedOrganisation) {
-            return res.status(404).json({ message: "Organisation not found" });
+            res.status(404).json({ message: "Organisation not found" });
+            return;
         }
         // Remove organisation reference from admin's list
         yield User.updateMany({ "organisations.organisation": id }, { $pull: { organisations: { organisation: id } } });

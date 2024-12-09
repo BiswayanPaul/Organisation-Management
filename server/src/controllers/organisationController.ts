@@ -8,7 +8,8 @@ export const createOrganisation = async (req: Request, res: Response) => {
         const { name, description, adminId } = req.body;
 
         if (!name || !adminId) {
-            return res.status(400).json({ message: "Name and adminId are required" });
+            res.status(400).json({ message: "Name and adminId are required" });
+            return;
         }
 
         // Create the organisation
@@ -30,7 +31,7 @@ export const createOrganisation = async (req: Request, res: Response) => {
 };
 
 // Get All Organisations
-export const getAllOrganisations = async (req: Request, res: Response) => {
+export const getAllOrganisations = async (req: Request, res: Response):Promise<void> => {
     try {
         const organisations = await Organisation.find().populate("admin", "name email");
         res.status(200).json(organisations);
@@ -47,7 +48,8 @@ export const getOrganisationById = async (req: Request, res: Response) => {
         const organisation = await Organisation.findById(id).populate("admin", "name email");
 
         if (!organisation) {
-            return res.status(404).json({ message: "Organisation not found" });
+            res.status(404).json({ message: "Organisation not found" });
+            return;
         }
 
         res.status(200).json(organisation);
@@ -70,7 +72,8 @@ export const updateOrganisation = async (req: Request, res: Response) => {
         );
 
         if (!updatedOrganisation) {
-            return res.status(404).json({ message: "Organisation not found" });
+            res.status(404).json({ message: "Organisation not found" });
+            return;
         }
 
         res.status(200).json(updatedOrganisation);
@@ -88,7 +91,8 @@ export const deleteOrganisation = async (req: Request, res: Response) => {
         const deletedOrganisation = await Organisation.findByIdAndDelete(id);
 
         if (!deletedOrganisation) {
-            return res.status(404).json({ message: "Organisation not found" });
+            res.status(404).json({ message: "Organisation not found" });
+            return;
         }
 
         // Remove organisation reference from admin's list

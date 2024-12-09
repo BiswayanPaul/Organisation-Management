@@ -8,5 +8,9 @@ router.get("/getusers", getAllUsers);
 
 // Route to get a user by ID
 router.get("/getuser/:id", getUserByIdController);
+router.put("/editUser/:id", );
+router.delete("/deleteUser/:id", );
+
+
 
 export default router;
