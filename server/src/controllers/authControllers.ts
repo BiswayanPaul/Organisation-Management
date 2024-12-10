@@ -7,7 +7,7 @@ import { JWT_SECRET } from "../config/dotenv.js";
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
     try {
         const { name, email, password } = req.body;
-        console.log({ name, email, password })
+        // console.log({ name, email, password })
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             res.status(400).json({ message: "Email already exists" });

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import Todo from "../schemas/todo";
-import User from "../schemas/user";
-import Organisation from "../schemas/organisation";
+import Todo from "../schemas/todo.js";
+import User from "../schemas/user.js";
+import Organisation from "../schemas/organisation.js";
 
 // Create a Todo
 export const createTodo = async (req: Request, res: Response): Promise<void> => {

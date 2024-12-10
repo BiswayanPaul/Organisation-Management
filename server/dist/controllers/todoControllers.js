@@ -7,9 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import Todo from "../schemas/todo";
-import User from "../schemas/user";
-import Organisation from "../schemas/organisation";
+import Todo from "../schemas/todo.js";
+import User from "../schemas/user.js";
+import Organisation from "../schemas/organisation.js";
 // Create a Todo
 export const createTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

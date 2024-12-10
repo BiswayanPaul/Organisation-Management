@@ -1,18 +1,32 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config/dotenv";
+import { JWT_SECRET } from "../config/dotenv.js";
+import { CustomRequest } from "../types/CustomRequest.js";
 
-export const protect = (req: Request, res: Response, next: NextFunction) => {
+interface JwtPayload {
+    id: string;
+    email: string;
+    iat: number;
+    exp: number;
+}
+
+export const protect = (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
         if (!token) {
-            return res.status(401).json({ message: "No token provided" });
+            res.status(401).json({ message: "No token provided" });
+            return;
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET);
-        (req as any).user = decoded; // Add user info to request object
+
+        const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+        req.userId = (decoded.id);
+        req.userEmail = decoded.email;
+        // console.log({decoded})
+
         next();
     } catch (error) {
+        console.error(error);
         res.status(401).json({ message: "Invalid token" });
     }
 };
