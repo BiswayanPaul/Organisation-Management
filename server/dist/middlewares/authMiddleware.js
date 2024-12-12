@@ -9,9 +9,10 @@ export const protect = (req, res, next) => {
             return;
         }
         const decoded = jwt.verify(token, JWT_SECRET);
+        console.log({ decoded }, "In Protect");
         req.userId = (decoded.id);
         req.userEmail = decoded.email;
-        // console.log({decoded})
+        req.organisationId = decoded.organisationId;
         next();
     }
     catch (error) {

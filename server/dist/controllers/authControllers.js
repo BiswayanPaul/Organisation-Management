@@ -49,3 +49,6 @@ export const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, functio
         res.status(500).json({ message: "Error logging in", error });
     }
 });
+export const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    res.send(200).json({ token: "" });
+});

@@ -7,16 +7,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import jwt from "jsonwebtoken";
 import Todo from "../schemas/todo.js";
 import User from "../schemas/user.js";
 import Organisation from "../schemas/organisation.js";
+import { JWT_SECRET } from "../config/dotenv.js";
 // Create a Todo
 export const createTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const { title, description, deadline, createdBy, assignedTo, organisation } = req.body;
+        const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
+        if (!token) {
+            res.status(401).json({ message: "No token provided" });
+            return;
+        }
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const createdBy = decoded.id;
+        const organisation = decoded.organisationId;
+        const { title, description, deadline, assignedTo } = req.body;
+        if (!organisation || !createdBy) {
+            res.status(400).json({ message: "organisation not selected yet" });
+            return;
+        }
         // Validate required fields
-        if (!title || !deadline || !createdBy || !organisation) {
-            res.status(400).json({ message: "Title, deadline, createdBy, and organisation are required" });
+        if (!title || !deadline || !assignedTo) {
+            res.status(400).json({ message: "Title, deadline & assignedTo are required" });
             return;
         }
         // Verify organisation exists
@@ -26,9 +41,14 @@ export const createTodo = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return;
         }
         // Verify user exists
-        const userExists = yield User.findById(createdBy);
+        const userExists = yield User.findByIdAndUpdate(createdBy);
         if (!userExists) {
             res.status(404).json({ message: "User (createdBy) not found" });
+            return;
+        }
+        const existingTodo = yield Todo.findOne({ title, assignedTo });
+        if (existingTodo) {
+            res.status(400).json({ message: "Todo with the same title already exist" });
             return;
         }
         // Create the todo
@@ -41,6 +61,11 @@ export const createTodo = (req, res) => __awaiter(void 0, void 0, void 0, functi
             organisation,
         });
         const savedTodo = yield todo.save();
+        yield User.findByIdAndUpdate(assignedTo, {
+            $push: {
+                todo: { todo: savedTodo._id, deadline: deadline },
+            },
+        });
         res.status(201).json(savedTodo);
     }
     catch (error) {
@@ -66,6 +91,7 @@ export const getAllTodos = (req, res) => __awaiter(void 0, void 0, void 0, funct
 export const getTodosByOrganisation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { organisationId } = req.params;
+        console.log(organisationId);
         const todos = yield Todo.find({ organisation: organisationId })
             .populate("createdBy", "name email")
             .populate("assignedTo", "name email");

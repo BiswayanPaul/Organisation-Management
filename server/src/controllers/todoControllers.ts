@@ -1,16 +1,38 @@
 import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import Todo from "../schemas/todo.js";
 import User from "../schemas/user.js";
 import Organisation from "../schemas/organisation.js";
+import { JWT_SECRET } from "../config/dotenv.js";
 
+
+interface JwtPayload {
+    id: string;
+    email: string;
+    organisationId:string;
+    iat: number;
+    exp: number;
+}
 // Create a Todo
 export const createTodo = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { title, description, deadline, createdBy, assignedTo, organisation } = req.body;
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            res.status(401).json({ message: "No token provided" });
+            return;
+        }
+        const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+        const createdBy = decoded.id;
+        const organisation = decoded.organisationId;
+        const { title, description, deadline, assignedTo } = req.body;
 
+        if(!organisation || !createdBy){
+            res.status(400).json({ message: "organisation not selected yet" });
+            return;
+        }
         // Validate required fields
-        if (!title || !deadline || !createdBy || !organisation) {
-            res.status(400).json({ message: "Title, deadline, createdBy, and organisation are required" });
+        if (!title || !deadline || !assignedTo) {
+            res.status(400).json({ message: "Title, deadline & assignedTo are required" });
             return;
         }
 
@@ -20,11 +42,17 @@ export const createTodo = async (req: Request, res: Response): Promise<void> => 
             res.status(404).json({ message: "Organisation not found" });
             return;
         }
-
         // Verify user exists
-        const userExists = await User.findById(createdBy);
+        const userExists = await User.findByIdAndUpdate(createdBy);
         if (!userExists) {
             res.status(404).json({ message: "User (createdBy) not found" });
+            return;
+        }
+
+        const existingTodo = await Todo.findOne({title, assignedTo});
+
+        if(existingTodo){
+            res.status(400).json({message:"Todo with the same title already exist"})
             return;
         }
 
@@ -39,6 +67,11 @@ export const createTodo = async (req: Request, res: Response): Promise<void> => 
         });
 
         const savedTodo = await todo.save();
+        await User.findByIdAndUpdate(assignedTo, {
+            $push: {
+                todo: { todo: savedTodo._id, deadline: deadline },
+            },
+        });
 
         res.status(201).json(savedTodo);
     } catch (error) {
@@ -66,6 +99,7 @@ export const getAllTodos = async (req: Request, res: Response): Promise<void> =>
 export const getTodosByOrganisation = async (req: Request, res: Response): Promise<void> => {
     try {
         const { organisationId } = req.params;
+        console.log(organisationId);
 
         const todos = await Todo.find({ organisation: organisationId })
             .populate("createdBy", "name email")

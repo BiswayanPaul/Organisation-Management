@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/user", userRouter);
 app.use("/organisation", protect, organisationRouter);
-app.use("/todo", todoRouter);
+app.use("/todo", protect, todoRouter);
 // app.use("/organisation",organisationRoutes);
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}/`);

@@ -6,6 +6,7 @@ import { CustomRequest } from "../types/CustomRequest.js";
 interface JwtPayload {
     id: string;
     email: string;
+    organisationId:string;
     iat: number;
     exp: number;
 }
@@ -20,9 +21,12 @@ export const protect = (req: CustomRequest, res: Response, next: NextFunction) =
 
 
         const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+
+        console.log({decoded},"In Protect");
         req.userId = (decoded.id);
         req.userEmail = decoded.email;
-        // console.log({decoded})
+        req.organisationId = decoded.organisationId;
+        
 
         next();
     } catch (error) {

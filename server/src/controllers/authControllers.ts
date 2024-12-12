@@ -48,3 +48,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({ message: "Error logging in", error });
     }
 };
+
+export const logout =async (req: Request, res: Response) =>{
+    res.send(200).json({token:""});
+}

@@ -22,7 +22,7 @@ app.get("/", (req: express.Request, res: express.Response) => {
 app.use("/auth", authRoutes);
 app.use("/user", userRouter);
 app.use("/organisation", protect, organisationRouter)
-app.use("/todo", todoRouter)
+app.use("/todo", protect, todoRouter)
 // app.use("/organisation",organisationRoutes);
 
 app.listen(PORT, () => {
