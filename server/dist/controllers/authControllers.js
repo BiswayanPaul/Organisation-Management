@@ -23,7 +23,7 @@ export const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, func
         const hashedPassword = yield bcrypt.hash(password, 10);
         const newUser = new User({ name, email, password: hashedPassword });
         yield newUser.save();
-        res.status(201).json({ message: "User registered successfully" });
+        res.status(201).json({ message: "User registered successfully", newUser });
     }
     catch (error) {
         res.status(500).json({ message: "Error registering user", error });
@@ -42,7 +42,7 @@ export const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, functio
             res.status(401).json({ message: "Invalid email or password" });
             return;
         }
-        const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: "1h" });
+        const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: "6h" });
         res.status(200).json({ token, message: "Login successful" });
     }
     catch (error) {
