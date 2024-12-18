@@ -3,11 +3,13 @@ import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import Cookies from 'js-cookie';
 import { useEffect } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 
 interface RegisterProps {
-    name: string;
-    setName: React.Dispatch<React.SetStateAction<string>>;
+    name?: string;
+    setName?: React.Dispatch<React.SetStateAction<string>>;
     email: string;
     setEmail: React.Dispatch<React.SetStateAction<string>>;
     password: string;
@@ -30,11 +32,12 @@ const Register = ({
     darkMode,
     setDarkMode,
 }: RegisterProps) => {
+    const navigate = useNavigate()
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
         if (!name || !email || !password) {
-            alert('Please fill out all fields!');
+            toast.error('Please fill out all fields!')
             return;
         }
 
@@ -60,11 +63,13 @@ const Register = ({
             const val = Cookies.get("token");
             console.log(val);
             console.log('Registration Response:', { result });
+            toast.success("Registration Successful!")
+            navigate("/login");
+            setTimeout(() => { navigate(0) }, 100);
 
-            alert('Registration Successful!');
         } catch (error) {
             console.error('Error:', error);
-            alert('An unexpected error occurred!');
+            toast.error('An unexpected error occurred!')
         } finally {
             setLoading(false);
         }
@@ -73,11 +78,12 @@ const Register = ({
     useEffect(() => {
         console.log("Hello")
         const val = Cookies.get("token")
-        console.log({val});
-    },[]);
+        console.log({ val });
+    }, []);
 
     return (
         <div className={`flex items-center justify-center min-h-screen p-4 ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+            <Toaster position='top-center'></Toaster>
             <div className={`w-full max-w-md ${darkMode ? 'bg-gray-700' : 'bg-white'} p-8 rounded-lg shadow-md`}>
                 <Switch
                     onClick={() => setDarkMode(!darkMode)}
@@ -98,7 +104,7 @@ const Register = ({
                             id="name"
                             type="text"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => { if (setName) setName(e.target.value) }}
                             className={`w-full p-2 border ${darkMode ? 'border-gray-600' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             placeholder="Enter your full name"
                             required

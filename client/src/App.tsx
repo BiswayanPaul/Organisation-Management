@@ -1,7 +1,27 @@
+import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
 import { useEffect, useState } from 'react';
+import Dashboard from './components/Dashboard';
+
+// Define types for props
+interface AuthProps {
+  email: string;
+  setEmail: React.Dispatch<React.SetStateAction<string>>;
+  password: string;
+  setPassword: React.Dispatch<React.SetStateAction<string>>;
+  loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  darkMode: boolean;
+  setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
+  name?: string; // Optional for Login
+  setName?: React.Dispatch<React.SetStateAction<string>>; // Optional for Login
+}
+
+// Wrapper components with proper props typing
+const LoginWrapper: React.FC<AuthProps> = (props) => <Login {...props} />;
+const RegisterWrapper: React.FC<AuthProps> = (props) => <Register {...props} />;
 
 const App = () => {
   const [email, setEmail] = useState<string>(''); // State for email
@@ -11,16 +31,15 @@ const App = () => {
   const [darkMode, setDarkMode] = useState<boolean>(false); // State for dark mode
 
   useEffect(() => {
-    // Check the system preference for dark mode and set the initial state
     const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setDarkMode(prefersDarkMode);
-  }, []); // Empty array ensures this runs only once after the initial render
+  }, []);
 
   const router = createBrowserRouter([
     {
       path: '/login',
       element: (
-        <Login
+        <LoginWrapper
           email={email}
           setEmail={setEmail}
           password={password}
@@ -35,7 +54,7 @@ const App = () => {
     {
       path: '/register',
       element: (
-        <Register
+        <RegisterWrapper
           email={email}
           setEmail={setEmail}
           password={password}
@@ -50,14 +69,18 @@ const App = () => {
       ),
     },
     {
-      path:"*",
-      element:<div>Page Not Found</div>
-    }
+      path: "/dashboard",
+      element: <Dashboard />
+    },
+    {
+      path: '*',
+      element: <div>Page Not Found</div>,
+    },
   ]);
 
   return (
     <main className={darkMode ? 'dark' : ''}>
-      <RouterProvider router={router}></RouterProvider>
+      <RouterProvider router={router} />
     </main>
   );
 };

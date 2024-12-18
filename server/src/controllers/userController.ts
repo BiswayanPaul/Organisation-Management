@@ -18,6 +18,7 @@ export const getUserByIdController = async (req: Request, res: Response, next: N
     try {
         const { id } = req.params;
 
+
         if (!id) {
             res.status(400).json({ success: false, message: "User ID is required" });
             return;

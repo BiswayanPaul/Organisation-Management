@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Switch } from "@/components/ui/switch"
 import Cookies from 'js-cookie';
+import toast, { Toaster } from 'react-hot-toast';
+import { useEffect } from 'react';
 
 
 
@@ -26,11 +28,12 @@ const Login = ({
     darkMode,
     setDarkMode,
 }: LoginProps) => {
+    const navigate = useNavigate()
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
         if (!email || !password) {
-            alert('Please fill out both fields!');
+            toast.error("Please fill out both fields!");
             return;
         }
 
@@ -56,18 +59,26 @@ const Login = ({
             const result = await response.json();
             console.log('Login Response:', { result });
             Cookies.set("token", result.token)
-            alert('Login Successful!');
+            toast.success("Login Successful!");
+
+            navigate("/dashboard");
+            setTimeout(() => { navigate(0) }, 100);
         } catch (error) {
             const err = error as Error;
             console.error('Error:', err.message);
-            alert(err.message || 'An error occurred. Please try again.');
+            toast.error(err.message || 'An error occurred. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
+    useEffect(() => {
+        console.log("Login Component Rendered");
+    }, []);
+
     return (
         <div className={`flex items-center justify-center min-h-screen p-4 ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+            <Toaster position='top-center'></Toaster>
             <div className={`w-full max-w-md ${darkMode ? 'bg-gray-700' : 'bg-white'} p-8 rounded-lg shadow-md`}>
                 <Switch
                     onClick={() => setDarkMode(!darkMode)}
