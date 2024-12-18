@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
 import { useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -60,25 +60,23 @@ const Register = ({
 
             const result = await response.json();
 
-            const val = Cookies.get("token");
-            console.log(val);
-            console.log('Registration Response:', { result });
-            toast.success("Registration Successful!")
+            toast.success(result.message)
             navigate("/login");
             setTimeout(() => { navigate(0) }, 100);
 
         } catch (error) {
-            console.error('Error:', error);
-            toast.error('An unexpected error occurred!')
+            const err = error as Error;
+            console.error('Error:', err.message);
+            toast.error(err.message || 'An error occurred. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        console.log("Hello")
-        const val = Cookies.get("token")
-        console.log({ val });
+        // console.log("Hello")
+        // const val = Cookies.get("token")
+        // console.log({ val });
     }, []);
 
     return (

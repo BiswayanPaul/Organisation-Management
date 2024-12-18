@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import { useEffect, useState } from 'react';
 import Dashboard from './components/Dashboard';
+import Todo from './components/Todo';
 
 // Define types for props
 interface AuthProps {
@@ -70,7 +71,11 @@ const App = () => {
     },
     {
       path: "/dashboard",
-      element: <Dashboard />
+      element: <Dashboard darkMode={darkMode} setDarkMode={setDarkMode}/>
+    },
+    {
+      path: "/todo",
+      element: <Todo />
     },
     {
       path: '*',

@@ -1,69 +1,91 @@
-import Cookies from "js-cookie"
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Button } from "./ui/button"
-import { Logout } from "@/helper/Logout"
-import { jwtDecode } from "jwt-decode"
-import { userInfo } from "../helper/GetUserInfo"
+import Cookies from "js-cookie";
+import { useEffect,  useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { userInfo } from "@/helper/GetUserInfo";
+import { decodeToken } from "@/helper/DecodeToken";
+import Sidebar from "./Sidebar";
+import Mainpage from "./Mainpage";
+import Rightbar from "./Rightbar";
+import Switch from "./Switch";
+import { IUser } from "@/types/user";
+import { Toaster } from "react-hot-toast";
 
-interface decodedProp {
-    id: string,
-    email: string
-}
+
 
 interface userProp {
-    user: object;
+    user: IUser;
     message: string;
 }
 
-const Dashboard = () => {
-    const navigate = useNavigate()
-    const [id, setId] = useState<string>("")
-    const [email, setEmail] = useState<string>("")
-    const [user, setUser] = useState<object | null>(null) // state for user data
+interface DashboardProp {
+    darkMode: boolean;
+    setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Dashboard = ({ darkMode, setDarkMode }: DashboardProp) => {
+    const navigate = useNavigate();
+    const [user, setUser] = useState<IUser | null>(null);
+    const [id, setId] = useState<string>("");
 
     useEffect(() => {
         const token = Cookies.get("token");
-        console.log(token);
         if (!token) {
             navigate("/login");
             setTimeout(() => navigate(0), 100);
             return;
         }
 
-        const decoded: decodedProp = jwtDecode(token);
-        console.log({ decoded });
-        setId(decoded.id)
-        setEmail(decoded.email)
+        const decoded = decodeToken(token);
+        if (!decoded) return;
 
-        // Define async function inside useEffect
         const getUserData = async () => {
-            const userData: userProp = await userInfo(decoded.id); // Pass the decoded.id
-            setUser(userData.user); // Set the user data
-            console.log(userData.user); // Log the user data to the console
-        }
+            const userData: userProp = await userInfo(decoded.id);
+            setUser(userData.user);
+        };
 
-        // Call the async function inside useEffect
         if (decoded.id) {
-            getUserData();
-        }
-
-    }, [navigate]) // Dependency array only depends on navigate, not id since id is being set inside the useEffect
-
-    const handleLogout = () => {
-        Logout();
-        navigate(0);
-    }
+            getUserData()
+            setId(decoded.id);
+        };
+    }, [navigate]);
 
     return (
-        <div>
-            <h1>Dashboard</h1>
-            <p>Email: {email}</p>
-            <p>ID: {id}</p>
-            <p>User Data: {JSON.stringify(user)}</p>
-            <Button variant="outline" onClick={handleLogout}>Logout</Button>
-        </div>
-    )
-}
+        <div className={`flex h-screen w-full ${darkMode ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
+            <Toaster position='top-center'></Toaster>
+            {/* Sidebar */}
+            <Sidebar user={user} darkMode={darkMode} />
 
-export default Dashboard
+            {/* Main Content */}
+            <div className="flex flex-col flex-1 h-screen">
+
+                {/* Header Section */}
+                <div className="w-full flex justify-between items-center px-6 py-4 border-b">
+                    <span className="font-bold text-2xl">Hi!! {user?.name}</span>
+                    <Switch
+                        darkMode={darkMode}
+                        setDarkMode={setDarkMode}
+                    />
+                </div>
+
+                {/* Main Content Area */}
+                <div className="flex flex-1 overflow-hidden">
+
+                    {/* Mainpage Component with Scrollable Content */}
+                    <div className="flex-1 p-4 overflow-y-auto">
+
+                            <Mainpage id={id} darkMode={darkMode} />
+
+                    </div>
+
+                    {/* Rightbar */}
+                    <div className="w-[27%] min-w-[300px] p-6 shadow-lg">
+                        <Rightbar darkMode={darkMode} />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+};
+
+export default Dashboard;

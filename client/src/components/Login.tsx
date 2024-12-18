@@ -40,8 +40,8 @@ const Login = ({
         setLoading(true);
 
         try {
-            console.log('Email:', email);
-            console.log('Password:', password);
+            // console.log('Email:', email);
+            // console.log('Password:', password);
 
             const response = await fetch('http://localhost:3000/auth/login', {
                 method: 'POST',
@@ -57,7 +57,7 @@ const Login = ({
             }
 
             const result = await response.json();
-            console.log('Login Response:', { result });
+            // console.log('Login Response:', { result });
             Cookies.set("token", result.token)
             toast.success("Login Successful!");
 
@@ -73,8 +73,13 @@ const Login = ({
     };
 
     useEffect(() => {
-        console.log("Login Component Rendered");
-    }, []);
+        // console.log("Login Component Rendered");
+        const token = Cookies.get("token");
+        if(token){
+            navigate("/dashboard");
+            setTimeout(() => { navigate(0) }, 100);
+        }
+    }, [navigate]);
 
     return (
         <div className={`flex items-center justify-center min-h-screen p-4 ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>

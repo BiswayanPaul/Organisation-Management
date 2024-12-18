@@ -17,6 +17,7 @@ export const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, func
         // console.log({ name, email, password })
         const existingUser = yield User.findOne({ email });
         if (existingUser) {
+            // console.log("Here")
             res.status(400).json({ message: "Email already exists" });
             return;
         }
